@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
 
 @Component({
   selector: 'app-root',
@@ -9,8 +10,14 @@ import { Observable } from 'rxjs/Observable';
 export class AppComponent implements OnInit, OnDestroy {
   title = 'app';
   observable$;
+  mySubject$;
 
   ngOnInit() {
+    this.createObservable();
+    this.createSubject();
+  }
+
+  private createObservable() {
     this.observable$ = Observable.create((observer) => {
       observer.next(1);
       observer.next(2);
@@ -25,7 +32,19 @@ export class AppComponent implements OnInit, OnDestroy {
     );
   }
 
+  private createSubject() {
+    this.mySubject$ = new Subject();
+
+    this.mySubject$.subscribe(x => console.log(`first subscribe`, x));
+    this.mySubject$.next('A');
+    this.mySubject$.next('B');
+
+    this.mySubject$.subscribe(x => console.log(`second subscribe`, x));
+    this.mySubject$.next('C');
+  }
+
   ngOnDestroy() {
     this.observable$.unsubscribe();
+    this.mySubject$.unsubscribe();
   }
 }
