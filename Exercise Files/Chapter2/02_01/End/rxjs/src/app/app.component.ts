@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 @Component({
   selector: 'app-root',
@@ -13,11 +14,13 @@ export class AppComponent implements OnInit, OnDestroy {
   observable$;
   mySubject$;
   myBehaviorSubject$;
+  myReplaySubject$;
 
   ngOnInit() {
     this.createObservable();
     this.createSubject();
     this.creatBehaviorSubject();
+    this.createReplaySubject();
   }
 
   private createObservable() {
@@ -57,9 +60,21 @@ export class AppComponent implements OnInit, OnDestroy {
     this.myBehaviorSubject$.next('Z');
   }
 
+  private createReplaySubject() {
+    this.myReplaySubject$ = new ReplaySubject();
+
+    this.myReplaySubject$.subscribe(x => console.log(`first subscribe`, x));
+    this.myReplaySubject$.next('value 1');
+    this.myReplaySubject$.next('value 2');
+
+    this.myReplaySubject$.subscribe(x => console.log(`second subscribe`, x));
+    this.myReplaySubject$.next('value 3');
+  }
+
   ngOnDestroy() {
     this.observable$.unsubscribe();
     this.mySubject$.unsubscribe();
     this.myBehaviorSubject$.unsubscribe();
+    this.myReplaySubject$.unsubscribe();
   }
 }
