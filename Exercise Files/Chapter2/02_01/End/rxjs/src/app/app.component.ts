@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -13,6 +14,8 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/do';
 
 @Component({
   selector: 'app-root',
@@ -26,13 +29,20 @@ export class AppComponent implements OnInit, OnDestroy {
   private myReplaySubject$;
   private numbers$: Observable<number>;
   private letters$: Observable<string>;
-  private searchSubject$: Subject<string>;
 
   private numbersSubscription: Subscription;
   private mixedSubscription: Subscription;
 
   private subscriptionFromClickEvent$: Subscription;
   private subscriptionFromInputEvent$: Subscription;
+
+  private searchSubjectBasicTest$: Subject<string>;
+  private searchSubject$: Subject<string>;
+
+  results$: Observable<any>;
+
+  constructor(private http: HttpClient) {
+  }
 
   ngOnInit() {
     // this.createObservable();
@@ -46,6 +56,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.createObservableFromClickEvent();
     this.createObservableFromInputEvent();
+
+    this.wrapAnAPI();
   }
 
   ngOnDestroy() {
@@ -149,11 +161,33 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private createObservableFromInputEvent() {
-    this.searchSubject$ = new Subject<string>();
+    this.searchSubjectBasicTest$ = new Subject<string>();
 
-    this.subscriptionFromInputEvent$ = this.searchSubject$
+    this.subscriptionFromInputEvent$ = this.searchSubjectBasicTest$
       .debounceTime(200)
       .subscribe(x => console.log('debounced', x));
+  }
+
+  inputChangedBasicTest($event) {
+    console.log('input changed', $event);
+    this.searchSubjectBasicTest$.next($event);
+  }
+
+  private wrapAnAPI() {
+    this.searchSubject$ = new Subject<string>();
+
+    this.results$ = this.searchSubject$
+      .debounceTime(800)
+      .distinctUntilChanged()
+      .do(x => console.log('log', x))
+      .switchMap(searchString => this.queryAPI(searchString));
+  }
+
+  private queryAPI(searchString: string): Observable<string> {
+    console.log('queryAPI', searchString);
+
+    return this.http.get(`https://www.reddit.com/r/aww/search.json?q=${searchString}`)
+      .map(result => result['data']['children']);
   }
 
   inputChanged($event) {
