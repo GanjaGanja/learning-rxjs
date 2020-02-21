@@ -12,6 +12,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/debounceTime';
 
 @Component({
   selector: 'app-root',
@@ -19,17 +20,19 @@ import 'rxjs/add/operator/switchMap';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  observable$;
-  mySubject$;
-  myBehaviorSubject$;
-  myReplaySubject$;
-  numbers$: Observable<number>;
-  letters$: Observable<string>;
-
-  observableFromEvent$;
+  private observable$;
+  private mySubject$;
+  private myBehaviorSubject$;
+  private myReplaySubject$;
+  private numbers$: Observable<number>;
+  private letters$: Observable<string>;
+  private searchSubject$: Subject<string>;
 
   private numbersSubscription: Subscription;
   private mixedSubscription: Subscription;
+
+  private subscriptionFromClickEvent$: Subscription;
+  private subscriptionFromInputEvent$: Subscription;
 
   ngOnInit() {
     // this.createObservable();
@@ -41,7 +44,21 @@ export class AppComponent implements OnInit, OnDestroy {
     // this.useMergeMapOperator();
     // this.useSwitchMapOperator();
 
-    this.createObservableFromEvent();
+    this.createObservableFromClickEvent();
+    this.createObservableFromInputEvent();
+  }
+
+  ngOnDestroy() {
+    this.observable$.unsubscribe();
+    this.mySubject$.unsubscribe();
+    this.myBehaviorSubject$.unsubscribe();
+    this.myReplaySubject$.unsubscribe();
+
+    this.numbersSubscription.unsubscribe();
+    this.mixedSubscription.unsubscribe();
+
+    this.subscriptionFromClickEvent$.unsubscribe();
+    this.subscriptionFromInputEvent$.unsubscribe();
   }
 
   private createObservable() {
@@ -126,18 +143,21 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(x => console.log(x));
   }
 
-  private createObservableFromEvent() {
-    this.observableFromEvent$ = Observable.fromEvent(document, 'click')
+  private createObservableFromClickEvent() {
+    this.subscriptionFromClickEvent$ = Observable.fromEvent(document.querySelector('#button'), 'click')
       .subscribe(x => console.log(x));
   }
 
-  ngOnDestroy() {
-    this.observable$.unsubscribe();
-    this.mySubject$.unsubscribe();
-    this.myBehaviorSubject$.unsubscribe();
-    this.myReplaySubject$.unsubscribe();
-    this.numbersSubscription.unsubscribe();
-    this.mixedSubscription.unsubscribe();
-    this.observableFromEvent$.unsubscribe();
+  private createObservableFromInputEvent() {
+    this.searchSubject$ = new Subject<string>();
+
+    this.subscriptionFromInputEvent$ = this.searchSubject$
+      .debounceTime(200)
+      .subscribe(x => console.log('debounced', x));
+  }
+
+  inputChanged($event) {
+    console.log('input changed', $event);
+    this.searchSubject$.next($event);
   }
 }
