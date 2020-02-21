@@ -10,6 +10,7 @@ import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/switchMap';
 
 @Component({
   selector: 'app-root',
@@ -35,7 +36,8 @@ export class AppComponent implements OnInit, OnDestroy {
     // this.createReplaySubject();
 
     // this.useBasicRxOperators();
-    this.useMergeMapOperator();
+    // this.useMergeMapOperator();
+    this.useSwitchMapOperator();
   }
 
   private createObservable() {
@@ -102,6 +104,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.mixedSubscription = this.letters$
       .mergeMap(x =>
+        this.numbers$
+          .take(5)
+          .map(i => i + x))
+      .subscribe(x => console.log(x));
+  }
+
+  private useSwitchMapOperator() {
+    this.numbers$ = Observable.interval(1000);
+    this.letters$ = Observable.of('a', 'b', 'c', 'd', 'e');
+
+    this.mixedSubscription = this.letters$
+      .switchMap(x =>
         this.numbers$
           .take(5)
           .map(i => i + x))
