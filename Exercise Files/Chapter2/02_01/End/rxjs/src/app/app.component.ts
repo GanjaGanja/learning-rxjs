@@ -3,9 +3,11 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/filter';
 
 @Component({
   selector: 'app-root',
@@ -18,17 +20,16 @@ export class AppComponent implements OnInit, OnDestroy {
   mySubject$;
   myBehaviorSubject$;
   myReplaySubject$;
+  numbers$: Observable<number>;
 
-  numbersForTakeOperator$;
-  numbersForMapOperator$;
+  private numbersSubscription: Subscription;
 
   ngOnInit() {
-    // this.createObservable();
-    // this.createSubject();
-    // this.creatBehaviorSubject();
-    // this.createReplaySubject();
-    // this.useTakeOperator();
-    this.useMapOperator();
+    this.createObservable();
+    this.createSubject();
+    this.creatBehaviorSubject();
+    this.createReplaySubject();
+    this.useBasicRxOperators();
   }
 
   private createObservable() {
@@ -79,16 +80,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.myReplaySubject$.next('value 3');
   }
 
-  private useTakeOperator() {
-    this.numbersForTakeOperator$ = Observable.interval(1000).take(5);
-    this.numbersForTakeOperator$.subscribe(x => console.log(x));
-  }
+  private useBasicRxOperators() {
+    this.numbers$ = Observable.interval(1000);
 
-  private useMapOperator() {
-    this.numbersForMapOperator$ = Observable.interval(1000);
-    this.numbersForMapOperator$
+    this.numbersSubscription = this.numbers$
       .take(5)
       .map(x => x * 10)
+      .filter(x => x % 2 === 0)
       .subscribe(x => console.log(x));
   }
 
@@ -97,7 +95,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.mySubject$.unsubscribe();
     this.myBehaviorSubject$.unsubscribe();
     this.myReplaySubject$.unsubscribe();
-    this.numbersForTakeOperator$.unsubscribe();
-    this.numbersForMapOperator$.unsubscribe();
+    this.numbersSubscription.unsubscribe();
   }
 }
