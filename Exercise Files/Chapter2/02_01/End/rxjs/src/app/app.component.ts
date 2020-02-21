@@ -5,9 +5,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/interval';
+import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/mergeMap';
 
 @Component({
   selector: 'app-root',
@@ -21,15 +23,19 @@ export class AppComponent implements OnInit, OnDestroy {
   myBehaviorSubject$;
   myReplaySubject$;
   numbers$: Observable<number>;
+  letters$: Observable<string>;
 
   private numbersSubscription: Subscription;
+  private mixedSubscription: Subscription;
 
   ngOnInit() {
-    this.createObservable();
-    this.createSubject();
-    this.creatBehaviorSubject();
-    this.createReplaySubject();
-    this.useBasicRxOperators();
+    // this.createObservable();
+    // this.createSubject();
+    // this.creatBehaviorSubject();
+    // this.createReplaySubject();
+
+    // this.useBasicRxOperators();
+    this.useMergeMapOperator();
   }
 
   private createObservable() {
@@ -90,11 +96,24 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(x => console.log(x));
   }
 
+  private useMergeMapOperator() {
+    this.numbers$ = Observable.interval(1000);
+    this.letters$ = Observable.of('a', 'b', 'c', 'd', 'e');
+
+    this.mixedSubscription = this.letters$
+      .mergeMap(x =>
+        this.numbers$
+          .take(5)
+          .map(i => i + x))
+      .subscribe(x => console.log(x));
+  }
+
   ngOnDestroy() {
     this.observable$.unsubscribe();
     this.mySubject$.unsubscribe();
     this.myBehaviorSubject$.unsubscribe();
     this.myReplaySubject$.unsubscribe();
     this.numbersSubscription.unsubscribe();
+    this.mixedSubscription.unsubscribe();
   }
 }
