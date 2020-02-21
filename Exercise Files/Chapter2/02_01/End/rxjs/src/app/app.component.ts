@@ -6,6 +6,7 @@ import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/take';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/filter';
@@ -18,13 +19,14 @@ import 'rxjs/add/operator/switchMap';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'app';
   observable$;
   mySubject$;
   myBehaviorSubject$;
   myReplaySubject$;
   numbers$: Observable<number>;
   letters$: Observable<string>;
+
+  observableFromEvent$;
 
   private numbersSubscription: Subscription;
   private mixedSubscription: Subscription;
@@ -37,7 +39,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // this.useBasicRxOperators();
     // this.useMergeMapOperator();
-    this.useSwitchMapOperator();
+    // this.useSwitchMapOperator();
+
+    this.createObservableFromEvent();
   }
 
   private createObservable() {
@@ -122,6 +126,11 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(x => console.log(x));
   }
 
+  private createObservableFromEvent() {
+    this.observableFromEvent$ = Observable.fromEvent(document, 'click')
+      .subscribe(x => console.log(x));
+  }
+
   ngOnDestroy() {
     this.observable$.unsubscribe();
     this.mySubject$.unsubscribe();
@@ -129,5 +138,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.myReplaySubject$.unsubscribe();
     this.numbersSubscription.unsubscribe();
     this.mixedSubscription.unsubscribe();
+    this.observableFromEvent$.unsubscribe();
   }
 }
