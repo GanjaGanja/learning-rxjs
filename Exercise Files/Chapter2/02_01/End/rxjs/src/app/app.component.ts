@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/take';
+import 'rxjs/add/operator/map';
 
 @Component({
   selector: 'app-root',
@@ -19,13 +20,15 @@ export class AppComponent implements OnInit, OnDestroy {
   myReplaySubject$;
 
   numbersForTakeOperator$;
+  numbersForMapOperator$;
 
   ngOnInit() {
     // this.createObservable();
     // this.createSubject();
     // this.creatBehaviorSubject();
     // this.createReplaySubject();
-    this.useTakeOperator();
+    // this.useTakeOperator();
+    this.useMapOperator();
   }
 
   private createObservable() {
@@ -81,11 +84,20 @@ export class AppComponent implements OnInit, OnDestroy {
     this.numbersForTakeOperator$.subscribe(x => console.log(x));
   }
 
+  private useMapOperator() {
+    this.numbersForMapOperator$ = Observable.interval(1000);
+    this.numbersForMapOperator$
+      .take(5)
+      .map(x => x * 10)
+      .subscribe(x => console.log(x));
+  }
+
   ngOnDestroy() {
     this.observable$.unsubscribe();
     this.mySubject$.unsubscribe();
     this.myBehaviorSubject$.unsubscribe();
     this.myReplaySubject$.unsubscribe();
     this.numbersForTakeOperator$.unsubscribe();
+    this.numbersForMapOperator$.unsubscribe();
   }
 }
