@@ -3,6 +3,8 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
+import 'rxjs/add/observable/interval';
+import 'rxjs/add/operator/take';
 
 @Component({
   selector: 'app-root',
@@ -16,11 +18,14 @@ export class AppComponent implements OnInit, OnDestroy {
   myBehaviorSubject$;
   myReplaySubject$;
 
+  numbersForTakeOperator$;
+
   ngOnInit() {
-    this.createObservable();
-    this.createSubject();
-    this.creatBehaviorSubject();
-    this.createReplaySubject();
+    // this.createObservable();
+    // this.createSubject();
+    // this.creatBehaviorSubject();
+    // this.createReplaySubject();
+    this.useTakeOperator();
   }
 
   private createObservable() {
@@ -71,10 +76,16 @@ export class AppComponent implements OnInit, OnDestroy {
     this.myReplaySubject$.next('value 3');
   }
 
+  private useTakeOperator() {
+    this.numbersForTakeOperator$ = Observable.interval(1000).take(5);
+    this.numbersForTakeOperator$.subscribe(x => console.log(x));
+  }
+
   ngOnDestroy() {
     this.observable$.unsubscribe();
     this.mySubject$.unsubscribe();
     this.myBehaviorSubject$.unsubscribe();
     this.myReplaySubject$.unsubscribe();
+    this.numbersForTakeOperator$.unsubscribe();
   }
 }
